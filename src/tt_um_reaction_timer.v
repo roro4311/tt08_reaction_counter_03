@@ -5,6 +5,7 @@ module tt_um_reaction_timer (
     output wire [7:0] uo_out,
     output wire [7:0] uio_out,
     output wire [7:0] uio_oe,
+    input wire [7:0] uio_in,  // Added uio_in port
     input wire ena
 );
 
