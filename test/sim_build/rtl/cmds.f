@@ -1,4 +1,3 @@
-+timescale+1ns/1ps
 # List of Verilog source files for simulation
 /home/runner/work/tt08_reaction_counter_03/tt08_reaction_counter_03/src/tt_um_reaction_timer.v
 /home/runner/work/tt08_reaction_counter_03/tt08_reaction_counter_03/src/reaction_timer.v
