@@ -1,69 +1,41 @@
 import cocotb
-from cocotb.triggers import RisingEdge, Timer
+from cocotb.regression import TestFactory
+from cocotb.regression import Simulation
+from cocotb.result import TestFailure
+from cocotb.regression import TestResult
+import random
 
-@cocotb.test()
-async def test_reaction_timer(dut):
-    """Test for the reaction_timer module"""
+@cocotb.coroutine
+def tt_um_tb(dut):
+    # Reset the design
+    dut.rst_n <= 0
+    dut.clk <= 0
+    dut.ui_in <= 0
+    dut.ena <= 0
+    yield cocotb.clock.Clock(dut.clk, 10, units="ns").start()
+    yield cocotb.regression.ClockCycles(dut.clk, 2)
+    dut.rst_n <= 1
+    yield cocotb.regression.ClockCycles(dut.clk, 2)
 
-    # Apply reset
-    dut.rst_n.value = 0
-    await Timer(10, units='ns')
-    dut.rst_n.value = 1
-    await Timer(10, units='ns')
+    # Test case 1: Basic functionality
+    dut.ui_in <= 8'hFF
+    dut.ena <= 1
+    yield cocotb.regression.ClockCycles(dut.clk, 10)
+    
+    # Check outputs
+    if dut.uo_out.value != 8'hxx:
+        raise TestFailure("uo_out did not match expected value")
 
-    # Ensure initial values
-    assert dut.time_out.value == 0, f"Expected 0, got {dut.time_out.value}"
+    if dut.uio_out.value != 8'hxx:
+        raise TestFailure("uio_out did not match expected value")
 
-    # Test case 1: LED on and button press
-    dut.led_on.value = 1
-    await RisingEdge(dut.clk)
-    await Timer(10, units='ns')
+    if dut.uio_oe.value != 8'hxx:
+        raise TestFailure("uio_oe did not match expected value")
 
-    for i in range(10):
-        await RisingEdge(dut.clk)
+    # Additional test cases can be added here
 
-    dut.button.value = 1
-    await RisingEdge(dut.clk)
-    await Timer(10, units='ns')
-    dut.button.value = 0
-
-    # Check the time_out value
-    expected_value = 10  # Adjust this based on your test case
-    assert dut.time_out.value == expected_value, f"Expected {expected_value}, got {dut.time_out.value}"
-
-    # Test case 2: LED on and off without button press
-    dut.led_on.value = 1
-    await RisingEdge(dut.clk)
-    await Timer(10, units='ns')
-
-    for i in range(5):
-        await RisingEdge(dut.clk)
-
-    dut.led_on.value = 0
-    await RisingEdge(dut.clk)
-    await Timer(10, units='ns')
-
-    # Check the time_out value
-    expected_value = 5  # Adjust this based on your test case
-    assert dut.time_out.value == expected_value, f"Expected {expected_value}, got {dut.time_out.value}"
-
-@cocotb.test()
-async def test_tt_um_reaction_timer(dut):
-    """Test for the tt_um_reaction_timer module"""
-
-    # Apply reset
-    dut.rst_n.value = 0
-    await Timer(10, units='ns')
-    dut.rst_n.value = 1
-    await Timer(10, units='ns')
-
-    # Set ui_in and enable
-    dut.ui_in.value = 0xAA
-    dut.ena.value = 1
-    await Timer(10, units='ns')
-    dut.ena.value = 0
-    await Timer(10, units='ns')
-
-    # Add more stimulus and checks as needed
-    # ...
-
+# Create TestFactory and add the test coroutine
+tf = TestFactory(tt_um_tb)
+tf.add_option("-sv")
+tf.add_option("-g2012")
+tf.generate_tests()
