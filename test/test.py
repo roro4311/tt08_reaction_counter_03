@@ -1,8 +1,7 @@
 import cocotb
-from cocotb.regression import TestFactory
 from cocotb.triggers import RisingEdge, Timer
 
-@cocotb.coroutine
+@cocotb.test()
 async def test_tt_um(dut):
     """Test for the tt_um module"""
 
@@ -54,7 +53,3 @@ async def test_tt_um(dut):
     assert dut.spi_clk.value == spi_clk_expected, f"Expected {spi_clk_expected}, got {dut.spi_clk.value}"
     assert dut.spi_mosi.value == spi_mosi_expected, f"Expected {spi_mosi_expected}, got {dut.spi_mosi.value}"
     assert dut.spi_cs.value == spi_cs_expected, f"Expected {spi_cs_expected}, got {dut.spi_cs.value}"
-
-if __name__ == "__main__":
-    factory = TestFactory(test_tt_um)
-    factory.generate_tests()
