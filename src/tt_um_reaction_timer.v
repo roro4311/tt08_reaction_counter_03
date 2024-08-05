@@ -19,18 +19,18 @@ module tt_um_reaction_timer (
     wire button = ui_in[0];
     wire led_on = ui_in[1];
 
-    // Instantiate the spi_driver module
+    // Instantiate the SPI module
     spi spi_inst (
         .clk(clk),
         .rst_n(rst_n),
-        .data_in(reaction_time),  // Connect reaction_timer output to spi input
+        .data_in(reaction_time),  // Connect reaction_timer output to SPI input
         .spi_clk(spi_clk),
         .spi_mosi(spi_mosi),
         .spi_miso(spi_miso),
         .spi_cs(spi_cs)
     );
 
-    // Instantiate the reaction_timer module
+    // Instantiate the Reaction Timer module
     reaction_timer reaction_timer_inst (
         .clk(clk),
         .rst_n(rst_n),
@@ -39,7 +39,7 @@ module tt_um_reaction_timer (
         .time_out(reaction_time)
     );
 
-    // Example logic to handle outputs
+    // Outputs handling
     assign uo_out = 8'b0;           // Default uo_out to 0
     assign uio_out = (ena) ? reaction_time : 8'b0; // Use reaction_time if enabled
     assign uio_oe = 8'b11111111;    // Example: set all as outputs
