@@ -20,6 +20,16 @@ module tt_um_reaction_timer (
         .cs(cs),
         .data_out(data_out)
     );
+ // Instantiate the reaction_timer module
+    reaction_timer reaction_timer_inst (
+        .clk(clk),
+        .rst_n(rst_n),
+        .ena(ena),
+        .ui_in(ui_in),
+        .uo_out(uo_out), // Adjust connections as needed
+        .uio_out(uio_out), // Adjust connections as needed
+        .uio_oe(uio_oe) // Adjust connections as needed
+    );
 
     // Logic to connect ui_in and handle outputs
     assign uo_out = 8'b0; // Assign outputs as needed
