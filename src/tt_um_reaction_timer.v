@@ -10,24 +10,24 @@ module tt_um_reaction_timer (
 );
 
     wire [7:0] reaction_time;
-    wire clk;
-    wire mosi;
-    wire miso;
-    wire cs;
+    wire spi_clk;
+    wire spi_mosi;
+    wire spi_miso;
+    wire spi_cs;
 
     // Assuming ui_in[0] is the button and ui_in[1] is the LED indicator
     wire button = ui_in[0];
     wire led_on = ui_in[1];
 
     // Instantiate the SPI module
-    spi spi_inst (
+    spi_driver spi_inst (
         .clk(clk),
         .rst_n(rst_n),
         .data_in(reaction_time),  // Connect reaction_timer output to SPI input
-        .clk(spi_clk),
-        .mosi(spi_mosi),
-        .miso(spi_miso),
-        .cs(spi_cs)
+        .spi_clk(spi_clk),
+        .spi_mosi(spi_mosi),
+        .spi_miso(spi_miso),
+        .spi_cs(spi_cs)
     );
 
     // Instantiate the Reaction Timer module
