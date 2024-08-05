@@ -5,12 +5,15 @@ module tt_um_reaction_timer (
     output wire [7:0] uo_out,
     output wire [7:0] uio_out,
     output wire [7:0] uio_oe,
-    input wire [7:0] uio_in,  // Added uio_in port
+    input wire [7:0] uio_in,
     input wire ena
 );
 
     wire miso, cs;
     wire [7:0] data_out;
+    wire button = ui_in[0];     // Assuming ui_in[0] is the button input
+    wire led_on = ui_in[1];     // Assuming ui_in[1] is the LED indicator
+    wire [7:0] reaction_time;
 
     // SPI driver instance
     spi_driver spi_inst (
@@ -20,25 +23,20 @@ module tt_um_reaction_timer (
         .cs(cs),
         .data_out(data_out)
     );
- // Instantiate the reaction_timer module
+
+    // Instantiate the reaction_timer module
     reaction_timer reaction_timer_inst (
         .clk(clk),
         .rst_n(rst_n),
-        .ena(ena),
-        .ui_in(ui_in),
-        .uo_out(uo_out), // Adjust connections as needed
-        .uio_out(uio_out), // Adjust connections as needed
-        .uio_oe(uio_oe) // Adjust connections as needed
+        .button(button),
+        .led_on(led_on),
+        .time_out(reaction_time)
     );
 
-    // Logic to connect ui_in and handle outputs
-    assign uo_out = 8'b0; // Assign outputs as needed
-
-    // Assuming uio_oe is used for controlling tri-state outputs
-    assign uio_oe = 8'b11111111; // Example: set all as outputs
-
-    // Connect data_out from SPI driver to uio_out if needed
+    // Logic to handle outputs
+    assign uo_out = 8'b0;           // Default uo_out to 0
     assign uio_out = (ena) ? data_out : 8'b0;
+    assign uio_oe = 8'b11111111;    // Example: set all as outputs
 
     // Debugging
     initial begin
