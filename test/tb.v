@@ -27,15 +27,6 @@ module tb;
         .ena(ena)
     );
 
-    // Instantiate the reaction_timer module
-    reaction_timer rt (
-        .clk(clk),
-        .rst_n(rst_n),
-        .button(button),
-        .led_on(led_on),
-        .time_out(time_out)
-    );
-
     initial begin
         // Initialize inputs
         clk = 0;
