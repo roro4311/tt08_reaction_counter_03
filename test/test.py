@@ -18,6 +18,12 @@ async def test_tt_um(dut):
     assert dut.uio_out.value == 0, f"Expected 0, got {dut.uio_out.value}"
     assert dut.uio_oe.value == 0b11111111, f"Expected 0b11111111, got {dut.uio_oe.value}"
 
+    # Check available signals
+    spi_signals = ["spi_mosi", "spi_miso", "spi_clk", "spi_cs"]
+    for signal in spi_signals:
+        if signal not in dir(dut):
+            raise AttributeError(f"{signal} is not found in the DUT")
+
     # Test case 1: Simulate LED reaction and button press
     dut.ui_in.value = 0b00000011  # Simulate LED on and button press
     dut.ena.value = 1
@@ -34,12 +40,9 @@ async def test_tt_um(dut):
     await RisingEdge(dut.clk)
     await Timer(10, units='ns')
 
-    # Check SPI signals (if applicable)
+    # Check SPI signals
     expected_spi_mosi = ...  # Set the expected SPI MOSI value
     assert dut.spi_mosi.value == expected_spi_mosi, f"Expected {expected_spi_mosi}, got {dut.spi_mosi.value}"
-
-    # Add more stimulus and checks as needed
-    # ...
 
     # Test case 2: Check SPI communication with different data
     dut.ui_in.value = 0b11110000  # Simulate different input
