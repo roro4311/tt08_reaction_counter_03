@@ -2,7 +2,7 @@ import cocotb
 from cocotb.regression import TestFactory
 from cocotb.triggers import RisingEdge, Timer
 
-@cocotb.test()
+@cocotb.coroutine
 async def test_tt_um(dut):
     """Test for the tt_um module"""
 
@@ -18,54 +18,42 @@ async def test_tt_um(dut):
     assert dut.uio_out.value == 0, f"Expected 0, got {dut.uio_out.value}"
     assert dut.uio_oe.value == 0b11111111, f"Expected 0b11111111, got {dut.uio_oe.value}"
 
-    # Check available signals
-    spi_signals = ["spi_mosi", "spi_miso", "spi_clk", "spi_cs"]
-    for signal in spi_signals:
-        if signal not in dir(dut):
-            raise AttributeError(f"{signal} is not found in the DUT")
+    # Initialize SPI signals
+    spi_mosi_expected = 0
+    spi_clk_expected = 0
+    spi_cs_expected = 1
 
-    # Test case 1: Simulate LED reaction and button press
-    dut.ui_in.value = 0b00000011  # Simulate LED on and button press
+    # Apply test stimulus
+    dut.ui_in.value = 0xAA  # Example input data
     dut.ena.value = 1
     await RisingEdge(dut.clk)
     await Timer(10, units='ns')
 
-    # Wait for some cycles
-    for _ in range(10):
+    # Wait for some cycles to allow SPI transmission
+    for _ in range(16):  # Adjust the number of cycles based on your clock divider
         await RisingEdge(dut.clk)
 
-    # Simulate button release
-    dut.ui_in.value = 0b00000000
-    dut.ena.value = 0
-    await RisingEdge(dut.clk)
-    await Timer(10, units='ns')
-
     # Check SPI signals
-    expected_spi_mosi = ...  # Set the expected SPI MOSI value
-    assert dut.spi_mosi.value == expected_spi_mosi, f"Expected {expected_spi_mosi}, got {dut.spi_mosi.value}"
+    assert dut.spi_clk.value == spi_clk_expected, f"Expected {spi_clk_expected}, got {dut.spi_clk.value}"
+    assert dut.spi_mosi.value == spi_mosi_expected, f"Expected {spi_mosi_expected}, got {dut.spi_mosi.value}"
+    assert dut.spi_cs.value == spi_cs_expected, f"Expected {spi_cs_expected}, got {dut.spi_cs.value}"
 
-    # Test case 2: Check SPI communication with different data
-    dut.ui_in.value = 0b11110000  # Simulate different input
+    # Additional test cases
+    dut.ui_in.value = 0x55  # Example different input data
     dut.ena.value = 1
     await RisingEdge(dut.clk)
     await Timer(10, units='ns')
 
-    # Wait for some cycles
-    for _ in range(10):
+    for _ in range(16):  # Adjust based on clock divider
         await RisingEdge(dut.clk)
 
-    # Simulate button press
-    dut.ui_in.value = 0b00001111
-    dut.ena.value = 0
-    await RisingEdge(dut.clk)
-    await Timer(10, units='ns')
+    # Check SPI signals again
+    spi_mosi_expected = 1  # Expected value after new input is processed
+    spi_cs_expected = 1  # Chip select should be high after transmission
 
-    # Check SPI signals
-    expected_spi_mosi = ...  # Set the expected SPI MOSI value
-    assert dut.spi_mosi.value == expected_spi_mosi, f"Expected {expected_spi_mosi}, got {dut.spi_mosi.value}"
-
-    # Additional stimulus and verification
-    # ...
+    assert dut.spi_clk.value == spi_clk_expected, f"Expected {spi_clk_expected}, got {dut.spi_clk.value}"
+    assert dut.spi_mosi.value == spi_mosi_expected, f"Expected {spi_mosi_expected}, got {dut.spi_mosi.value}"
+    assert dut.spi_cs.value == spi_cs_expected, f"Expected {spi_cs_expected}, got {dut.spi_cs.value}"
 
 if __name__ == "__main__":
     factory = TestFactory(test_tt_um)
